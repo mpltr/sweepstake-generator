@@ -1,69 +1,217 @@
-import Head from 'next/head'
-import Image from 'next/image'
-import styles from '../styles/Home.module.css'
+import React, { useState, useRef, useEffect } from "react";
+import styles from "../styles/Home.module.scss";
+
+const PLAYER_COUNTDOWN = 5000;
+const DELAY = 3000;
+
+const originalPeople = {
+    "J Willy": null,
+    PLN: null,
+    Gibbo: null,
+    "B Mol": null,
+    Neb: null,
+    Yaz: null,
+    G: null,
+    Damo: null,
+    Marco: null,
+    Pep: null,
+    Payno: null,
+    Sanju: null,
+    Matt: null,
+    Pross: null,
+    "The Thumb": null,
+    Josh: null,
+    Nic: null,
+    "Tom Lumb": null,
+    Marcus: null,
+    Brain: null,
+    Carol: null,
+    Max: null,
+    Seni: null,
+    Webby: null,
+    Augustine: null,
+    Nathan: null,
+    Penners: null,
+    Abid: null,
+    Whittle: null,
+    "Patricia Xiong": null,
+    "Stuart Hawkins": null,
+    "Matthias Munro": null,
+};
+
+const teams = [
+    { name: "Qatar", seed: 50, flag: "/flags/icons8-qatar-96.png" },
+    { name: "Germany", seed: 11, flag: "/flags/icons8-germany-96.png" },
+    { name: "Denmark", seed: 10, flag: "/flags/icons8-denmark-96.png" },
+    { name: "Brazil", seed: 1, flag: "/flags/icons8-brazil-96.png" },
+    { name: "France", seed: 4, flag: "/flags/icons8-france-96.png" },
+    { name: "Belgium", seed: 2, flag: "/flags/icons8-belgium-96.png" },
+    { name: "Croatia", seed: 12, flag: "/flags/icons8-croatia-96.png" },
+    { name: "Spain", seed: 7, flag: "/flags/icons8-spain-96.png" },
+    { name: "Serbia", seed: 21, flag: "/flags/icons8-serbia-96.png" },
+    { name: "England", seed: 5, flag: "/flags/icons8-england-circular-96.png" },
+    { name: "Switzerland", seed: 15, flag: "/flags/icons8-switzerland-96.png" },
+    { name: "Netherlands", seed: 8, flag: "/flags/icons8-netherlands-96.png" },
+    { name: "Argentina", seed: 3, flag: "/flags/icons8-argentina-96.png" },
+    { name: "Iran", seed: 20, flag: "/flags/icons8-iran-96.png" },
+    {
+        name: "Korea Republic",
+        seed: 28,
+        flag: "/flags/icons8-south-korea-96.png",
+    },
+    { name: "Japan", seed: 24, flag: "/flags/icons8-japan-96.png" },
+    {
+        name: "Saudi Arabia",
+        seed: 51,
+        flag: "/flags/icons8-saudi-arabia-96.png",
+    },
+    { name: "Ecuador", seed: 44, flag: "/flags/icons8-ecuador-96.png" },
+    { name: "Uruguay", seed: 14, flag: "/flags/icons8-uruguay-96.png" },
+    { name: "Canada", seed: 41, flag: "/flags/icons8-canada-96.png" },
+    { name: "Ghana", seed: 61, flag: "/flags/icons8-ghana-circular-96.png" },
+    {
+        name: "Senegal",
+        seed: 18,
+        flag: "/flags/icons8-senegal-circular-96.png",
+    },
+    { name: "Portugal", seed: 9, flag: "/flags/icons8-portugal-96.png" },
+    { name: "Poland", seed: 26, flag: "/flags/icons8-poland-96.png" },
+    { name: "Tunisia", seed: 30, flag: "/flags/icons8-tunisia-96.png" },
+    { name: "Morocco", seed: 22, flag: "/flags/icons8-morocco-96.png" },
+    { name: "Cameroon", seed: 43, flag: "/flags/icons8-cameroon-96.png" },
+    { name: "USA", seed: 16, flag: "/flags/icons8-usa-96.png" },
+    { name: "Mexico", seed: 13, flag: "/flags/icons8-mexico-96.png" },
+    { name: "Wales", seed: 19, flag: "/flags/icons8-wales-circular-96.png" },
+    { name: "Australia", seed: 38, flag: "/flags/icons8-australia-96.png" },
+    { name: "Costa Rica", seed: 31, flag: "/flags/icons8-costa-rica-96.png" },
+];
+
+const originalTeams = [...teams];
+
+const Card = ({ person, team, drawing }) => {
+    const { name, flag, seed } = team || {};
+
+    return (
+        <div className={styles.flipCard}>
+            <div className={name ? styles.drawnCard : styles.flipCardInner}>
+                <div className={styles.flipCardFront}>
+                    {drawing ? (
+                        <Timer seconds={PLAYER_COUNTDOWN / 1000} />
+                    ) : (
+                        <img src="/wc-logo.svg" alt="" />
+                    )}
+                </div>
+                <div className={styles.flipCardBack}>
+                    <div className={styles.name}>{person}</div>
+                    <div className={styles.assignedTeam}>
+                        {flag && (
+                            <img
+                                className={styles.flag}
+                                src={flag}
+                                alt={`${name} flag`}
+                            />
+                        )}
+                        {name && <div>{`${name} (${seed})`}</div>}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const Timer = ({ seconds }) => {
+    const [secondsleft, setSecondsLeft] = useState(seconds);
+
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            const newSeconds = secondsleft - 1;
+            if (newSeconds > -1) setSecondsLeft(secondsleft - 1);
+        }, 1000);
+        () => clearTimeout(timeout);
+    }, [secondsleft]);
+
+    return <div>{secondsleft > 0 ? secondsleft : null}</div>;
+};
 
 export default function Home() {
-  return (
-    <div className={styles.container}>
-      <Head>
-        <title>Create Next App</title>
-        <meta name="description" content="Generated by create next app" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+    const [people, setPeople] = useState(originalPeople);
 
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
+    useEffect(() => {
+        // Randomise people first
+        setPeople((prev) => {
+            return Object.fromEntries(
+                Object.entries(prev).sort(() => Math.random() - Math.random())
+            );
+        });
+    }, []);
+    const [drawing, setDrawing] = useState(null);
 
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
+    const peopleNames = Object.keys(people);
 
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h2>Documentation &rarr;</h2>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
+    const assignTeam = (person) => {
+        const randomIndex = Math.floor(Math.random() * teams.length);
+        const [selectedTeam] = teams.splice(randomIndex, 1);
+        if (selectedTeam) {
+            setPeople((prev) => {
+                const copy = { ...prev };
+                copy[person] = selectedTeam;
+                return copy;
+            });
+        }
+    };
 
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h2>Learn &rarr;</h2>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
+    const draw = (index) => {
+        const person = peopleNames[index];
+        setDrawing(person);
+        setTimeout(() => {
+            assignTeam(person);
+            setTimeout(() => {
+                setDrawing(null);
+                if (peopleNames[index + 1]) {
+                    draw(index + 1);
+                }
+            }, DELAY);
+        }, PLAYER_COUNTDOWN);
+    };
 
-          <a
-            href="https://github.com/vercel/next.js/tree/canary/examples"
-            className={styles.card}
-          >
-            <h2>Examples &rarr;</h2>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
+    return (
+        <div className={styles.screen}>
+            <div className={styles.grid}>
+                <button className={styles.startButton} onClick={() => draw(0)}>
+                    <img src="/wc-logo.svg" alt="" />
+                </button>
 
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h2>Deploy &rarr;</h2>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
+                <div></div>
+                {Object.keys(people).map((person) => {
+                    return (
+                        <Card
+                            person={person}
+                            team={people[person]}
+                            drawing={drawing === person}
+                            key={person}
+                        />
+                    );
+                })}
+            </div>
+            <div className={styles.teams}>
+                <h3>FIFA Rankings</h3>
+                <ul>
+                    {originalTeams
+                        .sort((a, b) => a.seed - b.seed)
+                        .map(({ name, seed }) => (
+                            <li
+                                key={name}
+                                className={
+                                    teams.find((team) => team.name === name)
+                                        ? styles.unselectedTeam
+                                        : styles.selectedTeam
+                                }
+                            >
+                                {`${seed}. ${name}`}
+                            </li>
+                        ))}
+                </ul>
+            </div>
         </div>
-      </main>
-
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <span className={styles.logo}>
-            <Image src="/vercel.svg" alt="Vercel Logo" width={72} height={16} />
-          </span>
-        </a>
-      </footer>
-    </div>
-  )
+    );
 }
