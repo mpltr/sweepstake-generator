@@ -19,8 +19,8 @@ const originalPeople = {
     Sanju: null,
     Matt: null,
     Pross: null,
-    "The Thumb": null,
-    Josh: null,
+    Japperly: null,
+    "Josh C": null,
     Nic: null,
     "Tom Lumb": null,
     Marcus: null,
@@ -34,9 +34,9 @@ const originalPeople = {
     Penners: null,
     Abid: null,
     Whittle: null,
-    "Patricia Xiong": null,
-    "Stuart Hawkins": null,
-    "Matthias Munro": null,
+    "Joey T": null,
+    "Tom Clark": null,
+    Aidy: null,
 };
 
 const teams = [
